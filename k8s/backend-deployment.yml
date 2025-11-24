@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: chatapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: adilzeb/chatapp-backend:latest
+          ports:
+            - containerPort: 5001
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: MONGODB_URI
+              # Use the Kubernetes Service name 'mongodb' (ClusterIP) in the chatapp namespace
+              value: "mongodb://root:admin@mongodb:27017/chatApp?authSource=admin&retryWrites=true&w=majority"
+            - name: PORT
+              value: "5001"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: chatapp-secrets
+                  key: jwt
